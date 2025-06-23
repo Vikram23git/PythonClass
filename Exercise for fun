@@ -1,0 +1,161 @@
+class Stack:
+    """
+    A custom Stack class that implements push, pop, and peek operations,
+    along with a specific push failure condition.
+    """
+    def __init__(self, name):
+        """
+        Initializes a new stack.
+
+        Args:
+            name (str): The name of the stack (e.g., 'a', 'b', 'c', 'd').
+        """
+        self.name = name
+        self.elements = []
+        self.counter = 0 # Represents the current 'top' position, similar to length
+
+    def is_empty(self):
+        """
+        Checks if the stack is empty.
+
+        Returns:
+            bool: True if the stack is empty, False otherwise.
+        """
+        return self.counter == 0
+
+    def peek(self):
+        """
+        Returns the top element of the stack without removing it.
+
+        Returns:
+            int or None: The top element if the stack is not empty, None otherwise.
+        """
+        if self.is_empty():
+            return None
+        return self.elements[self.counter - 1]
+
+    def pop(self):
+        """
+        Decrements the stack counter and returns the element at that position.
+
+        Returns:
+            int or None: The popped element if the stack is not empty, None otherwise.
+        """
+        if self.is_empty():
+            print(f"Error: Stack '{self.name}' is empty. Cannot pop.")
+            return None
+        self.counter -= 1
+        return self.elements[self.counter] # Return element at the new counter position
+
+    def push(self, x):
+        """
+        Inserts element x at the stack's counter position and increments the counter.
+        Handles specific failure conditions:
+        - Fails if current top 'y' has y < x.
+        - Fails if not (x + y) % 2 (i.e., (x + y) % 2 == 0).
+
+        Args:
+            x (int): The element to be pushed onto the stack.
+
+        Returns:
+            tuple: (bool, str) - True and empty string if push is successful,
+                   False and an error message if push fails.
+        """
+        if self.is_empty():
+            # If stack is empty, there's no 'y' to violate conditions, so push is always valid.
+            self.elements.insert(self.counter, x) # Insert at current counter
+            self.counter += 1
+            return True, ""
+        else:
+            y = self.peek()
+
+            # Failure condition 1: y < x
+            if y < x:
+                return False, f"Push failed on '{self.name}': element to push ({x}) is greater than current top ({y})."
+
+            # Failure condition 2: (x + y) % 2 == 0 (sum is even)
+            if (x + y) % 2 == 0:
+                return False, f"Push failed on '{self.name}': sum of element to push ({x}) and current top ({y}) is even."
+
+            # If both failure conditions are false, the push is valid
+            self.elements.insert(self.counter, x) # Insert at current counter
+            self.counter += 1
+            return True, ""
+
+    def __str__(self):
+        """
+        Returns a string representation of the stack.
+        """
+        # Display elements up to the current counter (actual stack content)
+        actual_elements = self.elements[:self.counter]
+        return f"Stack {self.name}: {actual_elements} (top: {self.peek()})"
+
+
+def print_all_stacks(stacks):
+    """Prints the current state of all given stacks."""
+    print("\nCurrent Stack States:")
+    for stack in stacks.values():
+        print(stack)
+    print("-" * 30)
+
+
+# Initialize stacks
+a = Stack('a')
+b = Stack('b')
+c = Stack('c')
+d = Stack('d')
+
+# List of all stacks for easy iteration
+all_stacks = {'a': a, 'b': b, 'c': c, 'd': d}
+
+# Initialisation with all four elements
+a.push(4)
+a.push(3)
+a.push(2)
+a.push(1)
+
+print("Initial State:")
+print_all_stacks(all_stacks)
+
+# Sequence of valid moves to transfer all numbers to stack d
+moves = [
+    ("d", "a", "Move 1 from 'a' to 'd'"),
+    ("c", "a", "Move 2 from 'a' to 'c'"),
+    ("b", "a", "Move 3 from 'a' to 'b'"),
+    ("c", "d", "Move 1 from 'd' to 'c'"),
+    ("d", "a", "Move 4 from 'a' to 'd'"),
+    ("d", "b", "Move 3 from 'b' to 'd'"),
+    ("d", "c", "Move 2 from 'c' to 'd'"),
+    ("d", "c", "Move 1 from 'c' to 'd'")
+]
+
+move_counter = 0
+for target_name, source_name, description in moves:
+    move_counter += 1
+    print(f"\n--- Performing {description} (Move {move_counter}) ---")
+
+    source_stack = all_stacks[source_name]
+    target_stack = all_stacks[target_name]
+
+    popped_val = source_stack.pop()
+
+    if popped_val is not None:
+        success, message = target_stack.push(popped_val)
+        if success:
+            print(f"Successfully moved {popped_val} from '{source_name}' to '{target_name}'.")
+        else:
+            print(f"Move failed: {message}. Returning {popped_val} to '{source_name}'.")
+            # If push fails, return the element to the source stack
+            # This is a simplified way to "return" the element.
+            source_stack.elements.insert(source_stack.counter, popped_val)
+            source_stack.counter += 1
+    else:
+        print(f"Pop from '{source_name}' failed as it was empty.")
+
+    print_all_stacks(all_stacks)
+
+print("\n--- Simulation Complete ---")
+if a.is_empty() and b.is_empty() and c.is_empty() and d.counter == 4:
+    print("All numbers successfully transferred to stack 'd'!")
+else:
+    print("Transfer not fully successful or 'd' does not contain all numbers.")
