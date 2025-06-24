@@ -1,0 +1,13 @@
+# PythonClass
+
+
+basket = {"Mango": 0.85,"Grapes": 0.40,"Milk": 1.50,"Butter": 2.00}
+
+quantities = {"Mango": 3, "Grapes": 5, "Milk": 2,"Butter": 1}
+
+total_cost = 0
+for item, price in basket.items():
+    quantity = quantities.get(item, 1)
+    total_cost += price * quantity
+
+print("Total basket cost: ", total_cost)
